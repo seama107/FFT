@@ -1,9 +1,12 @@
 #include "fft.h"
+#include "dft.h"
 #include <iostream>
 #include <complex>
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <chrono>
+
 
 using namespace std;
 
@@ -11,7 +14,7 @@ complex<double>* readDataFile(string filename, int* inputSizes, int inputIndex);
 
 int main(int argc, char const *argv[]) {
 
-  //Opening data file
+  //Opening data files
   string smallFileName;
   string medFileName;
   string largeFileName;
@@ -35,19 +38,63 @@ int main(int argc, char const *argv[]) {
   int medN = inputSizes[1];
   int largeN = inputSizes[2];
 
-  //Calculating FFT
-  complex<double>* fft_out = FFT(dataSmall, smallN);
+  std::chrono::steady_clock::time_point begin;
+  std::chrono::steady_clock::time_point end;
 
+  //Calculating DFT
+  cout << "Timing DFTs" << endl;
+
+  begin = std::chrono::steady_clock::now();
+  complex<double>* dftSmall = DFT(dataSmall, smallN);
+  end = std::chrono::steady_clock::now();
+  cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " microseconds." <<endl;
+
+/*
+  begin = std::chrono::steady_clock::now();
+  complex<double>* dftMed = DFT(dataMed, medN);
+  end = std::chrono::steady_clock::now();
+  cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " microseconds." <<endl;
+
+  begin = std::chrono::steady_clock::now();
+  complex<double>* dftLarge = DFT(dataLarge, largeN);
+  end = std::chrono::steady_clock::now();
+  cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " microseconds." <<endl;
+*/
+
+  //Calculating FFT
+  cout << "Timing FFTs" << endl;
+
+  begin = std::chrono::steady_clock::now();
+  complex<double>* fftSmall = FFT(dataSmall, smallN);
+  end = std::chrono::steady_clock::now();
+  cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " microseconds." <<endl;
+
+  begin = std::chrono::steady_clock::now();
+  complex<double>* fftMed = FFT(dataMed, medN);
+  end = std::chrono::steady_clock::now();
+  cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " microseconds." <<endl;
+
+  begin = std::chrono::steady_clock::now();
+  complex<double>* fftLarge = FFT(dataLarge, largeN);
+  end = std::chrono::steady_clock::now();
+  cout << "Time difference = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " microseconds." <<endl;
+
+
+  delete[] dftSmall;
+  //delete[] dftMed;
+  //delete[] dftLarge;
   delete[] dataSmall;
   delete[] dataMed;
   delete[] dataLarge;
-  delete[] fft_out;
+  delete[] fftSmall;
+  delete[] fftMed;
+  delete[] fftLarge;
 
   return 0;
 }
 
 complex<double>* readDataFile(string filename, int* inputSizes, int inputIndex) {
-  cout << endl << "Reading " << filename << " for signal data." << endl << endl;
+  cout << "Reading " << filename << " for signal data.    ";
   //Opening data file
   ifstream inFile(filename);
 
@@ -59,7 +106,7 @@ complex<double>* readDataFile(string filename, int* inputSizes, int inputIndex) 
   try {
     getline(inFile, line);
     n = stoi(line);
-    cout << "Found " << n << " data points." << endl;
+    cout << "Found " << n << " data points.    ";
     getline(inFile, line);
     sampleRate = stod(line);
     cout << "sampleRate of " << sampleRate << " Hz." << endl;
